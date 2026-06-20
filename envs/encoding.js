@@ -16,7 +16,7 @@ const BlackSoliderCandidates = new Array(45).fill(0).map((a, i) => 45 + i);
 
 //32位数组
 
-const PieceCandidates = [
+export const PieceCandidates = [
   [85, 86, 84, 76, 77, 75, 67, 68, 66, 127],//红帅
   [127, 86, 84, 76, 68, 66],//红士1-右
   [127, 84, 86, 76, 66, 68],//红士2-左
@@ -50,7 +50,7 @@ const PieceCandidates = [
   [127, 33, 42, ...BlackSoliderCandidates],//黑兵2
   [127, 35, 44, ...BlackSoliderCandidates],//黑兵1 -最右
 ];
-const initMap=[
+export const initMap=[
   85,86,84,87,83,
   81,89,82,88,64,70,
   62,60,58,56,54,
@@ -59,7 +59,7 @@ const initMap=[
   27,29,31,33,35
 ];
 const validarr=new Array(90).fill(0);
-const validMap = (arr) => {
+export const validMap = (arr) => {
     validarr.fill(0);
 
     for (let item of arr) {
@@ -72,6 +72,7 @@ const validMap = (arr) => {
 
     return true;
 };
+
 const ceilLog2Map = new Map([
   [1, 0],
   [2, 1],
@@ -172,7 +173,7 @@ function readFlexibleBits(array, bitsOffset, candidateLength) {
   }
   return [number, offset2];
 }
-function encoding(initMap) {
+export function encoding(initMap) {
   let current = 0;
   let offset = 0;
   const output = [];
@@ -207,7 +208,7 @@ function encoding(initMap) {
 
   return new Uint8Array(output);
 }
-function decoding(uint8) {
+export function decoding(uint8) {
   let bitsOffset = 0;
   const result = [];
 
@@ -226,9 +227,26 @@ function decoding(uint8) {
 
   return result;
 }
-const uint8 = encoding(initMap);
-console.log(uint8);
-const base64 = btoa(String.fromCharCode(...uint8));
-console.log(base64);
-const decoded = decoding(uint8);
-console.log(decoded);
+
+const encoded = encoding(initMap);
+/*
+Uint8Array(19) [
+   10, 73, 32, 144, 19, 74,  4,
+   33,  8, 66, 146,  9, 33, 16,
+  163, 65,  8,  66, 16
+]
+*/
+//console.log(encoded);
+const base64_code = btoa(String.fromCharCode(...encoded));
+//console.log(base64_code);
+//CkkgkBNKBCEIQpIJIRCjQQhCEA==
+const decoded = decoding(encoded);
+/*
+[
+  85, 86, 84, 87, 83, 81, 89, 82, 88,
+  64, 70, 62, 60, 58, 56, 54,  4,  3,
+   5,  2,  6,  0,  8,  1,  7, 19, 25,
+  27, 29, 31, 33, 35
+]
+*/
+//console.log(decoded);
