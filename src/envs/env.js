@@ -498,7 +498,7 @@ export class Game {
 
     //我方步进（非点击）
     //[step_success,next_state,reward,terminated,truncated]
-    step(actionIndex) {
+    async step(actionIndex, interval = 0) {
         let action_list = decode_action(actionIndex);
         //console.log("env_step:", action_list);
         let p = this.board.getPbyId(action_list[0]);
@@ -552,6 +552,9 @@ export class Game {
         if (this.turn !== "black") {
             console.error("The turn is not black!")
             return [false, initMap, 0, false, false];
+        }
+        if (interval > 0) {
+            await new Promise(resolve => setTimeout(resolve, interval));//1s
         }
         const [_, been_eat] = this.reflect();
         this.episode++;

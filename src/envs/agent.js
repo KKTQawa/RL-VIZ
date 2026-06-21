@@ -151,7 +151,7 @@ export class Agent {
 
         //console.log("modified action", actionIndex);
 
-        [success, nextState, reward, terminated, truncated] = this.env.step(actionIndex);
+        [success, nextState, reward, terminated, truncated] = await this.env.step(actionIndex);
 
         if (success) {
           logProbValue = logProb.dataSync()[0];
@@ -204,14 +204,12 @@ export class Agent {
           return { actionIndex };
         });
         // console.log("actionIndex", actionIndex);
-        actionIndex = this.env.ModifyAction(u.dataSync()[0]);
         if (actionIndex < 0) {
           console.error("internal error:ModifyAction return -1")
           return null;
         }
 
-        [success, nextState, reward, terminated, truncated] = this.env.step(actionIndex);
-        tf.dispose([s, u, logProb]);
+        [success, nextState, reward, terminated, truncated] = await this.env.step(actionIndex, 1000);
       }
 
       state = nextState;
@@ -368,9 +366,11 @@ export class Agent {
         advMean: metrics.advMean,//应该接近0
       });
     }
+    alert("训练完成,开始评估");
+    await this.test();
   }
   async test() {
     this.env.render_mode = "render"
-    await this.PlayGame(2000);
+    await this.PlayGame(1000);
   }
 }
