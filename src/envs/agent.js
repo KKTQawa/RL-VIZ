@@ -174,7 +174,54 @@ export class Agent {
 
     return buffer;
   }
+  async PlayGame(interval = 1000) {
+    let state = this.env.reset();
+    let done = false;
 
+    let st = 0;
+    while (true) {
+      st++;
+      //console.log("step", st);
+      let success = false;
+      let nextState, reward, terminated, truncated;
+
+      let actionIndex;
+      let trial = 0;
+      while (!success) {
+        trial++;
+        if (trial > 500) {
+          console.error("Too many trials!")
+          return null;
+        }
+        console.info("step:", st, "第", trial, "次尝试");
+
+        // 使用 tf.tidy 自动清理内存并确保梯度不被追踪
+        const { actionIndex } = tf.tidy(() => {
+          let encoded_state = encode_state(state);
+          const s = tf.tensor2d([encoded_state], [1, 1260]);
+          const { u, logProb } = this.actor.sampleAction(s);
+          const actionIndex = this.env.ModifyAction(u.dataSync()[0]);
+          return { actionIndex };
+        });
+        // console.log("actionIndex", actionIndex);
+        actionIndex = this.env.ModifyAction(u.dataSync()[0]);
+        if (actionIndex < 0) {
+          console.error("internal error:ModifyAction return -1")
+          return null;
+        }
+
+        [success, nextState, reward, terminated, truncated] = this.env.step(actionIndex);
+        tf.dispose([s, u, logProb]);
+      }
+
+      state = nextState;
+      done = terminated || truncated;
+
+      await new Promise(resolve => setTimeout(resolve, interval));//1s
+
+      if (done) break;
+    }
+  }
   computeGAE(buffer) {
     //  const values = buffer.map(b =>
     //   this.critic.value(tf.tensor([b.state])).dataSync()[0]
@@ -321,5 +368,9 @@ export class Agent {
         advMean: metrics.advMean,//应该接近0
       });
     }
+  }
+  async test() {
+    this.env.render_mode = "render"
+    await this.PlayGame(2000);
   }
 }

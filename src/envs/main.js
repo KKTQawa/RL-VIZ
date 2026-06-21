@@ -1,11 +1,11 @@
 import { Game } from "./env.js";
-import { piece2id, rc2num, num2rc ,encode_action} from "./utils.js";
+import { piece2id, rc2num, num2rc, encode_action } from "./utils.js";
 import { Agent } from "./agent.js";
 
 const env = new Game();
-let agent=new Agent(env);
+let agent = new Agent(env);
 let autoplaying = false;
-let now_action =encode_action([piece2id('red', '炮', 1),rc2num(7,4)]) ;//当头炮
+let now_action = encode_action([piece2id('red', '炮', 1), rc2num(7, 4)]);//当头炮
 
 function reset() {
     now_action = env.reset();
@@ -25,7 +25,7 @@ function autoplay(x) {
     }
 }
 function sample_action(state) {
-    
+
 }
 
 function start() {
@@ -45,8 +45,13 @@ function start() {
 async function train() {
     await agent.train();
 }
-function test(){
-    reset();
+async function test() {
+    await agent.test();
+}
+async function load() {
+
+}
+async function save() {
 
 }
 
@@ -56,3 +61,5 @@ window.reset = reset;
 window.autoplay = autoplay;
 window.train = train;
 window.test = test;
+window.load = load;
+window.save = save;
