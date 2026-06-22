@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="/RL-VIZ/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RL可视化</title>
 <style>
   body {
@@ -73,6 +73,7 @@
   }
 
 </style>
+  <script type="module" crossorigin src="/RL-VIZ/assets/index-D_h_CjiH.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -81,7 +82,7 @@
     <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" class="github-icon" alt="GitHub">
   </a>
 
-<div class="nav-item" onclick="showContent('src/envs/chess.html')">
+<div id="chessNav" class="nav-item">
   <img src="https://cdn-icons-png.flaticon.com/512/1995/1995572.png" class="nav-icon">
   <span class="nav-text">Chinese Chess</span>
 </div>
@@ -90,15 +91,8 @@
 
 <div class="content">
   <iframe id="mainFrame" src="" style="width:100%;height:100%;border:none;"></iframe>
-</div>
 
-<script>
-  function showContent(page) {
-    const frame = document.getElementById("mainFrame");
-    frame.src = page;
-  }
-
-</script>
+</div>
 
 </body>
 </html>
