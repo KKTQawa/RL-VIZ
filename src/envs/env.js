@@ -490,6 +490,7 @@ export class Game {
             if (this.turn === "black")
                 setTimeout(() => this.reflect(), 300);
             this.episode++;
+            console.warn("episode:", this.episode);
         }
     }
     initEvents() {
@@ -504,12 +505,12 @@ export class Game {
         let p = this.board.getPbyId(action_list[0]);
         if (!p) return [false, initMap, 0, false, false];//棋子已阵亡
 
-        let n_r, n_c;
+        let n_r, n_c, is_fly;
 
         if (action_list[1] == 0) {
             if (p.id != 0) return [false, initMap, 0, false, false];
             //飞将
-            let { is_fly, n_r, n_c } = this.board.CheckFly();
+            [is_fly, n_r, n_c] = this.board.CheckFly();
             if (!is_fly) return [false, initMap, 0, false, false];
 
         } else {
@@ -517,7 +518,7 @@ export class Game {
             let moved_num = now_num + action_list[1];
             //超出边界
             if (moved_num < 0 || moved_num > 89) {
-                console.log("移动超出边界！");
+                // console.log("移动超出边界！");
                 return [false, initMap, 0, false, false];
             }
             [n_r, n_c] = num2rc(moved_num);
@@ -569,7 +570,7 @@ export class Game {
         if (been_eat >= 0) {
             reward -= this.getEatReward(been_eat);
         }
-        if (is_eat) {
+        if (is_eat >= 0) {
             reward += this.getEatReward(is_eat);
         }
         if (this.episode > 15 && this.episode < 50) reward -= 0.4;
@@ -599,8 +600,8 @@ export class Game {
             if (next_state[22] == 90) com += 2;
             reward += com;
         }
-
-        console.log(`回合${this.episode},reward:${reward}`);
+        if (this.episode % 50 == 0)
+            console.log(`回合${this.episode},reward:${reward}`);
 
         if (been_eat >= 0) {
             //console.log(`剩下区间长度:${this.redalive} 剩余合法区间： ${this.redlegalX}`);
