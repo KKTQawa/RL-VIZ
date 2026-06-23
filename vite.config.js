@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 
-export default defineConfig(({ command, mode }) => {
-    // mode 为 'production' 时使用 /RL-VIZ/，否则使用 /
-    const base = mode === 'production' ? '/RL-VIZ/' : '/src/'
-    console.log('当前模式:', mode, 'Base路径:', base)
+export default defineConfig(({ mode }) => {
+    const base = mode === 'production' ? '/RL-VIZ/' : '/'
+
     return {
-        base: base,
+        base,
+        build: {
+            rollupOptions: {
+                input: {
+                    main: resolve(__dirname, 'index.html'),
+                    chess: resolve(__dirname, 'src/pages/chess.html'),
+                }
+            }
+        }
     }
 })
