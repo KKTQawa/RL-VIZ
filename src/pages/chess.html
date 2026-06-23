@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chinese Chess RL Environment</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            overflow-x: hidden;
+            overflow-y:auto;
+            flex-direction: column;
+            height:100%;
+            position:relative;
+
+        }
+        #graph{
+            width:100%;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0; 
+            position: relative;
+        }
+        #graph-container{
+            width: 1000px;
+            height: 600px;
+        }
+        #show{
+            flex: 1;
+            margin: 0;
+            display: flex;
+
+            width:100%;
+            background: #f2d7a0;
+            position: relative;
+        }
+        #game{
+            height: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex:1;
+        }
+
+        #controls {
+            width: 200px;
+            padding: 10px;
+        }
+
+        canvas {
+            background: #f7e1b5;
+            border: 3px solid #333;
+        }
+
+        button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+  <script type="module" crossorigin src="/RL-VIZ/assets/chess-Bbuvrlzh.js"></script>
+  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/modulepreload-polyfill-Dezn_h7o.js">
+</head>
+
+<body>
+<div id="show">
+    <div id="game">
+        <canvas id="board" width="600" height="670"></canvas>
+    </div>
+
+    <div id="controls">
+        <button id="resetBtn">重置</button>
+        <button id="trainBtn">训练模型</button>
+        <button id="testBtn">评估模型</button>
+        <button id="loadBtn">加载模型</button>
+        <button id="saveBtn">保存模型</button>
+        <button id="drawGraphBtn">测试绘图</button>
+    </div>
+
+</div>
+<div id="graph">
+    <div id="graph-container"></div>
+</div>
+
+
+</body>
+
+</html>

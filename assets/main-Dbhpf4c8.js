@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-Dezn_h7o.js";function e(e){let t=document.getElementById(`mainFrame`);t.src=e}document.getElementById(`chessNav`).addEventListener(`click`,()=>{let t=`./src/pages/chess.html`;console.log(`try to load:`,t),e(t)});
