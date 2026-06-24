@@ -21,7 +21,7 @@
 
         #cfgQValue {
             position: absolute;
-            right: 23px;
+            right: 230px;
             top: 10px;
             width: 320px;
             height: 300px;
@@ -80,9 +80,20 @@
             border-radius: 6px;
             pointer-events: none;
             display: none;
-            max-width: 400px;
+            max-width: 450px;
             max-height: 300px;
             z-index: 999;
+
+            word-wrap: break-word;
+            /* 允许长单词换行 */
+            word-break: break-word;
+            /* 在任意位置断行 */
+            white-space: normal;
+            /* 正常换行（默认值） */
+            overflow-y: auto;
+            /* 内容超出时显示滚动条 */
+            line-height: 1.5;
+            /* 行高，提升可读性 */
         }
 
         #controls {
@@ -103,7 +114,7 @@
 
         #maze_explainer_text {
             width: 70%;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         #QTable {
@@ -223,19 +234,21 @@
 
         #maze_steps {
             position: absolute;
-            bottom: 100px;
+            bottom: 150px;
             right: 230px;
 
             /* z-index: 999; */
 
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            width: 200px;
+
             display: flex;
             justify-content: center;
+            font-size: 24px;
         }
 
         .step-container {
+            position: relative;
             padding: 12px 14px;
             border-radius: 12px;
 
@@ -243,6 +256,7 @@
             border: 1px solid rgba(120, 160, 255, 0.15);
 
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
+            font-size: 24px;
         }
 
         .flow-title {
@@ -267,38 +281,37 @@
             padding: 8px 12px;
             border-radius: 10px;
 
-            font-size: 13px;
-            color: #aab4c5;
+            font-size: 20px;
+            color: #e4edf4;
 
-            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.06);
 
             transition: all 0.25s ease;
 
             cursor: pointer;
+            width: 90%;
         }
 
         .flow-node:hover {
             transform: translateX(4px) scale(1.02);
-            background: rgba(120, 170, 255, 0.12);
-            color: #ffffff;
+            color: #66ea7a;
             border-color: rgba(120, 170, 255, 0.35);
         }
 
         .flow-node.active {
-            color: #fff;
-            background: linear-gradient(135deg, #4c8bf5, #6ea8ff);
+            color: #66ea7a;
+
             box-shadow: 0 0 14px rgba(76, 139, 245, 0.5);
         }
 
         .flow-node.done {
-            color: #dbe7ff;
-            background: rgba(76, 139, 245, 0.18);
+            color: #66ea7a;
+
         }
 
         /* ===== >>>>> 动态流动箭头 ===== */
         .flow-node::after {
-            content: "↓";
+            content: "↓ ↓ ↓";
             position: absolute;
 
             left: 50%;
@@ -306,13 +319,13 @@
 
             transform: translateX(-50%);
 
-            font-size: 16px;
+            font-size: 20px;
             color: rgba(255, 255, 255, 0.25);
         }
 
         /* active时箭头动画 */
         .flow-node.active::after {
-            color: #4c8bf5;
+            color: #66ea7a;
             animation: flowDown 0.8s linear infinite;
         }
 
@@ -348,9 +361,10 @@
             }
         }
     </style>
-  <script type="module" crossorigin src="/RL-VIZ/assets/maze-DZfuF856.js"></script>
+  <script type="module" crossorigin src="/RL-VIZ/assets/maze-ceovjXgt.js"></script>
   <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/modulepreload-polyfill-Dezn_h7o.js">
   <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/preload-helper-DB-v99-l.js">
+  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/steps-Bj2mbzdd.js">
 </head>
 
 <body>
@@ -374,9 +388,9 @@
         </div>
 
         <div id="controls">
-            <button id="resetBtn">重置所有</button>
-            <button id="resetAgentBtn">重置智能体</button>
-            <button id="fresh">刷新页面/刷新地图</button>
+            <button id="resetBtn">复位智能体</button>
+            <button id="resetAgentBtn">清空智能体</button>
+            <button id="fresh">刷新页面</button>
 
             <button id="trainBtn">训练</button>
             <button id="stepTrainBtn">训练一轮</button>
