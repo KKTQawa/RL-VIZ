@@ -26,7 +26,7 @@ const initConfig = {
 
   renderTrain: true,
   renderSpeed: 10,
-  stepMode: false,
+  stepMode: true,
   stop: false,
 
   trainEpisodes: 300,
@@ -214,7 +214,7 @@ function drawTooltip(p) {
   }
 
   tooltip.innerHTML = html;
-  tooltip.style.left = p.mouseX + 12 + "px";
+  tooltip.style.left = p.mouseX + 300 + "px";
   tooltip.style.top = p.mouseY + 12 + "px";
   tooltip.style.display = "block";
 }
@@ -678,19 +678,26 @@ function updateQ(s, a, r, s2) {
 
   document.getElementById(`q_sa`).textContent = `Q(${qsrc.x}-${qsrc.y},a)`;
   document.getElementById(`q_s2a2`).textContent = `Q(${qs2rc.x}-${qs2rc.y},a')`;
+
   for (let i = 0; i < 4; i++) {
     let Qcolor1 = "#e6e6e6";
     if (s in Qactive && Qactive[s] == i) {
       Qcolor1 = "#80fa4c";
     }
-    let Qcolor2 = "#e6e6e6";
-    if (s2 in Qactive && Qactive[s2] == i) {
-      Qcolor2 = "#80fa4c";
-    }
+
     document.getElementById(`q_sa_${i}`).textContent = q[i].toFixed(3);
     document.getElementById(`q_sa_${i}`).style.color = Qcolor1;
-    document.getElementById(`q_s2a_${i}`).textContent = q2[i].toFixed(3);
-    document.getElementById(`q_s2a_${i}`).style.color = Qcolor2;
+
+    const el2 = document.getElementById(`q_s2a_${i}`);
+    el2.textContent = q2[i].toFixed(3);
+
+    if (q2[i] === maxNext) {
+      el2.style.color = "#eb5454";   // 高亮色
+      el2.style.fontWeight = "bold";
+    } else {
+      el2.style.color = "#e6e6e6";
+      el2.style.fontWeight = "normal";
+    }
   }
 }
 
@@ -1009,6 +1016,9 @@ export function resetAgent() {
   });
 
   initQTable();
+
+  document.getElementById("cfgQValue").value = formatQTable(Q);
+  document.getElementById("cfgQValue").style.display = "none";
 }
 
 
@@ -1039,8 +1049,39 @@ export function resetVis() {
   isTest = false
   Qactive = {}
 }
+function formatQTable(Q) {
+  const cols = ["0", "1", "2", "3"];
+
+  // 收集所有 state key
+  const states = Object.keys(Q)
+    .map(k => k.split(",").map(Number))
+    .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+
+  let out = "";
+
+  // 表头
+  out += "  Q   " + cols.map(c => c.padEnd(8)).join("") + "\n";
+
+  for (let [x, y] of states) {
+    const key = `${x},${y}`;
+    const q = Q[key] || [0, 0, 0, 0];
+
+    let row = `${key}  `;
+
+    for (let i = 0; i < 4; i++) {
+      row += q[i].toFixed(2).padEnd(8);
+    }
+
+    out += row + "\n";
+  }
+
+  return out;
+}
 export function debug() {
-  console.log(Q);
+  console.log("Q:", Q);
+  //document.getElementById("cfgQValue").value = JSON.stringify(Q, null, 2);
+  document.getElementById("cfgQValue").value = formatQTable(Q);
+  document.getElementById("cfgQValue").style.display = "block";
 }
 
 export function stopTrain() {
@@ -1052,6 +1093,8 @@ export function restore() {
   Object.keys(new_config).forEach(k => {
     config[k] = new_config[k];
   });
+
+  document.getElementById("cfgQValue").style.display = "none";
   alert("已恢复初始配置");
 }
 export function applyConfig() {
@@ -1074,6 +1117,13 @@ export function applyConfig() {
     config.draw_current_path = e.target.checked
     config.draw_paths = e.target.checked
   }
+
+  get("cfgShowMarkers").onchange = (e) => {
+    config.draw_policy = e.target.checked
+  }
+
+  get("cfgShowHeatmap").onchange = (e) =>
+    (config.draw_heatmap = e.target.checked);
 
   get("cfgEpisodes").oninput = (e) =>
     (config.trainEpisodes = +e.target.value);

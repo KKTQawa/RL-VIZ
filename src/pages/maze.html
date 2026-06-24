@@ -19,6 +19,34 @@
             position: relative;
         }
 
+        #cfgQValue {
+            position: absolute;
+            right: 230px;
+            top: 10px;
+            width: 320px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        #cfgQValue::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #cfgQValue::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        #cfgQValue::-webkit-scrollbar-thumb {
+            background: #89ccf4 rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        #cfgQValue {
+            scrollbar-width: thin;
+            scrollbar-color: #89ccf4 rgba(255, 255, 255, 0.05);
+        }
+
         #show {
             flex: 1;
             margin: 0;
@@ -116,10 +144,10 @@
 
         .maze_v {
             position: absolute;
-            left: 10px;
+
             background: rgba(20, 20, 30, 0.85);
             color: #9ecbff;
-            width: 80px;
+            width: 180px;
 
             border-radius: 10px;
             padding: 6px;
@@ -136,18 +164,22 @@
 
         #cfgQagent_s {
             top: 300px;
+            left: 10px;
         }
 
         #cfgQagent_a {
             top: 340px;
+            left: 10px;
         }
 
         #cfgQagent_r {
             top: 380px;
+            left: 10px;
         }
 
         #cfgQagent_qs {
             top: 420px;
+            left: 10px;
         }
 
         #QTable table {
@@ -357,10 +389,11 @@
             </div>
             <table id="QTable"></table>
             <span id="maze_formula"></span>
-            <span class="maze_v" id="cfgQagent_s">s: 0,0</span>
-            <span class="maze_v" id="cfgQagent_a">a: 0</span>
-            <span class="maze_v" id="cfgQagent_r">r: 0</span>
-            <span class="maze_v" id="cfgQagent_qs">s': 0,0</span>
+            <span class="maze_v" id="cfgQagent_s">s(当前状态): 0,0</span>
+            <span class="maze_v" id="cfgQagent_a">a(当前动作): 0</span>
+            <span class="maze_v" id="cfgQagent_r">r(即时奖励): 0</span>
+            <span class="maze_v" id="cfgQagent_qs">s'(下一状态): 0,0</span>
+            <textarea class="maze_v" id="cfgQValue"></textarea>
             <span id="maze_tooltip"></span>
 
         </div>
@@ -397,6 +430,21 @@
             <div class="cfgRow">
                 <label>显示路径</label>
                 <input type="checkbox" id="cfgShowPath" />
+            </div>
+
+            <div class="cfgRow">
+                <label>显示格子深度</label>
+                <input type="checkbox" id="cfgShowHeatmap" />
+            </div>
+
+            <div class="cfgRow">
+                <label>显示标记</label>
+                <input type="checkbox" id="cfgShowMarkers" />
+            </div>
+
+            <div class="cfgRow">
+                <label>显示调试信息</label>
+                <input type="checkbox" id="cfgConsole" />
             </div>
 
             <div class="cfgRow">
@@ -480,6 +528,8 @@
         document.getElementById('stopBtn').addEventListener('click', stopTrain);
         document.getElementById('restoreBtn').addEventListener('click', restore);
 
+        document.getElementById('cfgConsole').addEventListener('change', ConsoleUpdate);
+
         const episodeEl = document.getElementById("currentEpisode");
 
         function updateViewConfig() {
@@ -487,6 +537,8 @@
             document.getElementById('cfgStepMode').checked = config.stepMode;
             document.getElementById('cfgHighRender').checked = config.high_render;
             document.getElementById('cfgShowPath').checked = config.draw_current_path || config.draw_paths;
+            document.getElementById('cfgShowMarkers').checked = config.draw_policy;
+            document.getElementById('cfgShowHeatmap').checked = config.draw_heatmap;
             document.getElementById('cfgEpisodes').value = config.trainEpisodes;
             document.getElementById('cfgMaxSteps').value = config.maxSteps;
             document.getElementById('cfgRenderSpeed').value = config.renderSpeed;
@@ -496,23 +548,46 @@
             document.getElementById('cfgGamma').value = config.gamma;
             document.getElementById('cfgEpsilon').value = config.epsilon;
             document.getElementById("currentEpisode").textContent = `episode: ${config.currentEpisode}`;
+            document.getElementById('cfgConsole').checked = true;
+            ConsoleUpdate();
         }
 
         watch("currentEpisode", (val) => {
             episodeEl.textContent = `episode: ${val}`;
         });
         watch("Qagent_s", (val) => {
-            document.getElementById("cfgQagent_s").textContent = `s: ${val}`;
+            document.getElementById("cfgQagent_s").textContent = `s(当前状态): ${val}`;
         });
         watch("Qagent_a", (val) => {
-            document.getElementById("cfgQagent_a").textContent = `a: ${val}`;
+            document.getElementById("cfgQagent_a").textContent = `a(当前动作): ${val}`;
         });
         watch("Qagent_r", (val) => {
-            document.getElementById("cfgQagent_r").textContent = `r: ${val.toFixed(3)}`;
+            document.getElementById("cfgQagent_r").textContent = `r(即时奖励): ${val.toFixed(3)}`;
         });
         watch("Qagent_qs", (val) => {
-            document.getElementById("cfgQagent_qs").textContent = `s': ${val}`;
+            document.getElementById("cfgQagent_qs").textContent = `s'(下一状态): ${val}`;
         });
+
+        function ConsoleUpdate() {
+            let is_show = document.getElementById("cfgConsole").checked;
+            if (is_show) {
+                document.getElementById("cfgQagent_s").style.display = "block";
+                document.getElementById("cfgQagent_a").style.display = "block";
+                document.getElementById("cfgQagent_r").style.display = "block";
+                document.getElementById("cfgQagent_qs").style.display = "block";
+                document.getElementById("QTable").style.display = "block";
+                document.getElementById("cfgQValue").style.display = "block";
+                document.getElementById("maze_formula").style.display = "flex";
+            } else {
+                document.getElementById("cfgQagent_s").style.display = "none";
+                document.getElementById("cfgQagent_a").style.display = "none";
+                document.getElementById("cfgQagent_r").style.display = "none";
+                document.getElementById("cfgQagent_qs").style.display = "none";
+                document.getElementById("QTable").style.display = "none";
+                document.getElementById("cfgQValue").style.display = "none";
+                document.getElementById("maze_formula").style.display = "none";
+            }
+        }
 
         updateViewConfig();
         applyConfig();
