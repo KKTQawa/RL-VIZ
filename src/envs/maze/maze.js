@@ -62,6 +62,9 @@ export const config = new Proxy(structuredClone(initConfig), {
     if (key === "currentEpisode") {
       notify("currentEpisode", value);
     }
+    if (key === "stepMode") {
+      notify("stepMode", value);
+    }
 
     return true;
   }
@@ -217,7 +220,7 @@ function drawTooltip(p) {
   }
 
   tooltip.innerHTML = html;
-  tooltip.style.left = p.mouseX + 300 + "px";
+  tooltip.style.left = p.mouseX + 130 + "px";
   tooltip.style.top = p.mouseY + 12 + "px";
   tooltip.style.display = "block";
 }
@@ -620,6 +623,7 @@ function rc2stateId(x, y) {
   return `${x},${y}`;
 }
 function stateId2rc(stateId) {
+  //console.log("stateId", stateId);
   const [x, y] = stateId.split(",");
   return { x, y };
 }
@@ -763,31 +767,70 @@ const sketch = (p) => {
   };
   return p;
 };
+const stepRenderV = {
+  a: -1,
+  s2: -1,
+  reward: -1,
+  d: 0,
+}
+function ResetAgentinfo() {
+  const new_Agentinfo = structuredClone(init_Agentinfo);
+  Object.keys(new_Agentinfo).forEach(k => {
+    Agentinfo[k] = new_Agentinfo[k];
+  });
+  config.now_train_step = 0;
+  config.now_test_step = 0;
+}
 export async function stepRender() {
+  const RunStepFunctions = {
+    0: RunStep0,
+    1: RunStep1,
+    2: RunStep2
+  };
   if (config.stepMode) {
     RunStepFunctions[config.now_train_step]();
     await setStepRender("train", config.now_train_step);
+    config.now_train_step++
   }
   else {
+    config.isTest = true;
+    RunStepFunctions[config.now_test_step]();
+    config.isTest = false;
     await setStepRender("test", config.now_test_step);
+    config.now_test_step++
   }
-  config.now_train_step = (config.now_train_step + 1) % 3;
-  config.now_test_step = (config.now_test_step + 1) % 3;
-}
-const RunStepFunctions = {
-  0: RunStep0,
-  1: RunStep1,
-  2: RunStep2
-};
-function RunStep0() {
 
+  if (config.now_train_step > 2) {
+    //ResetAgentinfo();
+    config.now_train_step = 0;
+  }
+  if (config.now_test_step > 1) {
+    //ResetAgentinfo();
+    config.now_test_step = 0;
+  }
+
+  function RunStep0() {
+    console.log("RunStep0", Agentinfo);
+    const s = rc2stateId(agent.x, agent.y);
+    Agentinfo.Qagent_s = s;
+    Agentinfo.Qagent_a = chooseAction(s);
+  }
+  function RunStep1() {
+    console.log("RunStep1", Agentinfo);
+    const res = step(Agentinfo.Qagent_a);
+    Agentinfo.Qagent_qs = res.s2;
+    Agentinfo.Qagent_r = res.reward;
+    if (res.done) {
+      alert("到达终点");
+    }
+
+  }
+  function RunStep2() {
+    console.log("RunStep2", Agentinfo);
+    updateQ(Agentinfo.Qagent_s, Agentinfo.Qagent_a, Agentinfo.Qagent_r, Agentinfo.Qagent_qs);
+  }
 }
-function RunStep1() {
-}
-function RunStep2() {
-}
-function RunStep3() {
-}
+
 export function SingleStep() {
   const s = rc2stateId(agent.x, agent.y);
   const a = chooseAction(s);
@@ -974,6 +1017,7 @@ export async function train() {
     }
   }
   alert("训练完成");
+  reset();
 }
 export async function test() {
   reset();
@@ -997,6 +1041,7 @@ export async function test() {
   }
   isTest = false
   alert("测试完成,总步数：" + stepCount + ",是否到达终点：" + done);
+  reset();
 }
 //刷新整个界面
 export function fresh() {
@@ -1038,10 +1083,7 @@ export function resetAgent() {
   currentPath = [];
   edgeWeight = {};
 
-  const new_Agentinfo = structuredClone(init_Agentinfo);
-  Object.keys(new_Agentinfo).forEach(k => {
-    Agentinfo[k] = new_Agentinfo[k];
-  });
+  ResetAgentinfo();
 
   initQTable();
 
@@ -1061,10 +1103,7 @@ export function reset() {
     dir: null,
   };
 
-  const new_Agentinfo = structuredClone(init_Agentinfo);
-  Object.keys(new_Agentinfo).forEach(k => {
-    Agentinfo[k] = new_Agentinfo[k];
-  });
+  ResetAgentinfo();
 
   config.stop = false;
   resetVis();
@@ -1076,6 +1115,8 @@ export function resetVis() {
   hoverStartTime = 0;
   isTest = false
   Qactive = {}
+  config.now_train_step = 0;
+  config.now_test_step = 0;
 }
 function formatQTable(Q) {
   const cols = ["0", "1", "2", "3"];
