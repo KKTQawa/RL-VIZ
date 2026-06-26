@@ -1,6 +1,17 @@
 const p5Module = await import("https://cdn.jsdelivr.net/npm/p5@1.9.0/+esm");
 const p5 = p5Module.default;
+const { drawlineGraph } = await import("../chess/graph.js");
+const { createTrainingRecord } = await import("../shared/trainingDiagnostics.js");
+const { createEpisodeTrace, createEpisodeStepRecord } = await import("../shared/episodeTrace.js");
+const { createEpisodeViewer } = await import("../shared/episodeViewer.js");
 const { setStepRender } = await import("./steps.js");
+
+const MAZE_ACTION_LABELS = ["上", "下", "左", "右"];
+const mazeEpisodeViewer = createEpisodeViewer({
+  containerId: "episode-viewer-root-maze",
+  title: "Single Episode RL Visualization",
+  subtitle: "Replay one Maze Q-learning episode with path, policy scores, and reward decomposition.",
+});
 // export const config = {
 //   cols: 25,// 必须奇数
 //   rows: 25,
