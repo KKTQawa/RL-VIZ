@@ -3,20 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles/ink-theme.css" />
     <title>Maze RL Environment</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <!-- <script type="module" src="/src/envs/maze/maze.js"></script> -->
     <style>
         body {
-            margin: 0;
             display: flex;
             overflow-x: auto;
             overflow-y: auto;
             flex-direction: column;
-            height: 100%;
+            min-height: 100vh;
             position: relative;
+            padding: 24px;
         }
 
         #cfgQValue {
@@ -49,16 +50,25 @@
 
         #show {
             flex: 1;
-            margin: 0;
             display: flex;
             width: 100%;
+            gap: 24px;
             position: relative;
+            padding: 24px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(12px);
         }
 
         #maze_info {
             position: absolute;
             top: 30px;
-            font-size: 20px;
+            left: 26px;
+            font-size: 18px;
+            color: var(--gold);
+            letter-spacing: 0.04em;
         }
 
         #game {
@@ -74,10 +84,10 @@
 
         #maze_tooltip {
             position: absolute;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--ink-text);
+            padding: 10px 12px;
+            border-radius: 12px;
             pointer-events: none;
             display: none;
             max-width: 450px;
@@ -97,8 +107,16 @@
         }
 
         #controls {
-            width: 200px;
-            padding: 10px;
+            width: 316px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(12px);
         }
 
         #maze_explainer {
@@ -106,10 +124,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            gap: 10px;
+            padding: 18px;
+            margin-top: 18px;
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
         }
 
         #maze_explainer_text {
@@ -121,16 +142,13 @@
             position: absolute;
             left: 10px;
             top: 80px;
-
-            background: rgba(20, 20, 30, 0.85);
-            color: #e6e6e6;
-
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--ink-text);
+            border-radius: 16px;
             padding: 10px;
-
             font-size: 16px;
-
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(6px);
         }
 
@@ -138,18 +156,15 @@
             position: absolute;
             left: 10px;
             top: 10px;
-            background: rgba(20, 20, 30, 0.85);
-            color: #e6e6e6;
-
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--ink-text);
+            border-radius: 16px;
             padding: 6px;
-
             font-size: 16px;
-
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(6px);
             height: 50px;
-
             display: flex;
             align-items: center;
             justify-content: center;
@@ -164,15 +179,12 @@
 
             border-radius: 10px;
             padding: 6px;
-
             font-size: 16px;
-
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(6px);
-
             display: flex;
             align-items: center;
-
         }
 
         #cfgQagent_s {
@@ -203,12 +215,11 @@
         #QTable td {
             padding: 6px 10px;
             text-align: center;
-
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         #QTable th {
-            color: #9ecbff;
+            color: var(--jade);
             font-weight: 600;
         }
 
@@ -219,17 +230,15 @@
 
         /* hover */
         #QTable tr:hover td {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(95, 158, 160, 0.05);
         }
 
-        /* 表头强化 */
         #QTable tr:first-child th {
-            border-bottom: 2px solid rgba(120, 180, 255, 0.5);
+            border-bottom: 2px solid rgba(95, 158, 160, 0.25);
         }
 
         button {
             width: 100%;
-            margin-bottom: 10px;
         }
 
         #maze_steps {
@@ -309,7 +318,6 @@
 
         }
 
-        /* ===== >>>>> 动态流动箭头 ===== */
         .flow-node::after {
             content: "↓ ↓ ↓";
             position: absolute;
@@ -323,7 +331,6 @@
             color: rgba(255, 255, 255, 0.25);
         }
 
-        /* active时箭头动画 */
         .flow-node.active::after {
             color: #66ea7a;
             animation: flowDown 0.8s linear infinite;
@@ -358,6 +365,53 @@
 
             to {
                 background-position: 16px 0;
+            }
+        }
+
+        .cfgRow {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid rgba(60, 70, 60, 0.08);
+            color: var(--ink-text-soft);
+        }
+
+        .cfgRow label {
+            font-size: 13px;
+            color: var(--ink-text-soft);
+        }
+
+        #graph {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding-top: 18px;
+        }
+
+        #graph-container {
+            width: min(1180px, 100%);
+            min-height: 600px;
+        }
+
+        @media (max-width: 1180px) {
+            #show {
+                flex-direction: column;
+            }
+
+            #controls {
+                width: 100%;
+            }
+
+            #maze_explainer_text {
+                width: 100%;
+            }
+
+            #game {
+                grid-template-columns: minmax(140px, 200px) minmax(0, 1fr);
             }
         }
     </style>
@@ -491,6 +545,7 @@
     <div id="graph">
         <div id="graph-container"></div>
     </div>
+    <div id="episode-viewer-root-maze"></div>
 
     <script type="module">
         import {
