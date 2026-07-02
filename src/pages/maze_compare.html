@@ -17,9 +17,9 @@
     .compare-shell,
     .compare-panel {
       border-radius: 28px;
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(60, 70, 60, 0.08);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      background: var(--ink-panel);
+      border: 1px solid var(--ink-border);
+      box-shadow: var(--shadow-soft);
       backdrop-filter: blur(12px);
     }
 
@@ -32,12 +32,12 @@
     .compare-title {
       margin: 0;
       font-size: 28px;
-      color: var(--ink-text);
+      color: var(--ink-heading-primary);
     }
 
     .compare-subtitle {
       margin: 6px 0 0;
-      color: var(--ink-text-muted);
+      color: var(--ink-copy);
       line-height: 1.7;
       font-size: 14px;
     }
@@ -53,23 +53,24 @@
       gap: 8px;
       padding: 12px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.86);
-      border: 1px solid rgba(60, 70, 60, 0.06);
+      background: rgba(14, 82, 92, 0.74);
+      border: 1px solid rgba(108, 214, 203, 0.14);
     }
 
     .compare-field label {
       font-size: 12px;
-      color: var(--ink-text-muted);
+      color: rgba(184, 232, 226, 0.9);
       letter-spacing: 0.04em;
     }
 
     .compare-field input,
     .compare-field select {
       border-radius: 12px;
-      border: 1px solid rgba(60, 70, 60, 0.12);
+      border: 1px solid var(--ink-border);
       padding: 10px 12px;
       color: var(--ink-text);
-      background: rgba(255, 255, 255, 0.96);
+      font-weight: 600;
+      background: rgba(10, 58, 65, 0.82);
     }
 
     .compare-actions {
@@ -86,8 +87,8 @@
     .compare-status {
       padding: 14px 16px;
       border-radius: 18px;
-      background: rgba(95, 158, 160, 0.08);
-      border: 1px solid rgba(95, 158, 160, 0.08);
+      background: rgba(93, 207, 201, 0.12);
+      border: 1px solid rgba(108, 214, 203, 0.16);
       color: var(--ink-text);
       line-height: 1.7;
       white-space: pre-line;
@@ -108,12 +109,12 @@
     .compare-panel h2 {
       margin: 0;
       font-size: 20px;
-      color: var(--ink-text);
+      color: var(--ink-heading-secondary);
     }
 
     .compare-panel p {
       margin: 0;
-      color: var(--ink-text-muted);
+      color: var(--ink-copy-soft);
       font-size: 13px;
     }
 
@@ -128,17 +129,20 @@
     .compare-viewer-toolbar select {
       min-width: 220px;
       border-radius: 12px;
-      border: 1px solid rgba(60, 70, 60, 0.12);
+      border: 1px solid var(--ink-border);
       padding: 9px 12px;
-      background: rgba(255, 255, 255, 0.96);
+      color: var(--ink-text);
+      background: rgba(10, 58, 65, 0.82);
     }
 
     .compare-canvas {
-      width: 100%;
-      height: 420px;
+      display: block;
+      width: min(100%, 620px);
+      height: auto;
       border-radius: 22px;
-      background: rgba(243, 244, 242, 0.9);
-      border: 1px solid rgba(60, 70, 60, 0.08);
+      background: rgba(10, 58, 65, 0.72);
+      border: 1px solid rgba(108, 214, 203, 0.14);
+      justify-self: center;
     }
 
     .compare-meta {
@@ -146,8 +150,8 @@
       gap: 8px;
       padding: 12px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.86);
-      border: 1px solid rgba(60, 70, 60, 0.06);
+      background: rgba(14, 82, 92, 0.68);
+      border: 1px solid rgba(108, 214, 203, 0.14);
     }
 
     .compare-meta__row {
@@ -159,12 +163,12 @@
     }
 
     .compare-meta__row span {
-      color: var(--ink-text-muted);
+      color: rgba(184, 232, 226, 0.88);
     }
 
     .compare-meta__empty {
       margin: 0;
-      color: var(--ink-text-muted);
+      color: rgba(184, 232, 226, 0.88);
     }
 
     .compare-charts {
@@ -184,11 +188,11 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="/RL-VIZ/assets/mazeCompare-DNUHuKiV.js"></script>
+  <script type="module" crossorigin src="/RL-VIZ/assets/mazeCompare-rFItpddp.js"></script>
   <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/dist-6tjBzsZC.js">
-  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/ink-theme-DtODCcuF.js">
+  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/ink-theme-B9CfNZtT.js">
   <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/episodeTrace-Dv7cCdsY.js">
-  <link rel="stylesheet" crossorigin href="/RL-VIZ/assets/ink-theme-CGoIS5iB.css">
+  <link rel="stylesheet" crossorigin href="/RL-VIZ/assets/ink-theme-BrGjx0TA.css">
 </head>
 <body>
   <div class="compare-shell">
@@ -235,7 +239,7 @@
       <div class="compare-viewer-toolbar">
         <select id="qEpisodeSelect"></select>
       </div>
-      <canvas id="qCanvas" class="compare-canvas" width="620" height="420"></canvas>
+      <canvas id="qCanvas" class="compare-canvas" width="620" height="620"></canvas>
       <div id="qMeta" class="compare-meta"></div>
     </div>
 
@@ -247,7 +251,7 @@
       <div class="compare-viewer-toolbar">
         <select id="ppoEpisodeSelect"></select>
       </div>
-      <canvas id="ppoCanvas" class="compare-canvas" width="620" height="420"></canvas>
+      <canvas id="ppoCanvas" class="compare-canvas" width="620" height="620"></canvas>
       <div id="ppoMeta" class="compare-meta"></div>
     </div>
   </div>

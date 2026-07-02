@@ -6,26 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>RL Visualization Lab</title>
 <style>
+  :root {
+    --sidebar-width: 288px;
+    --sidebar-visible-width: 288px;
+    --splitter-width: 14px;
+  }
+
   body {
     display: flex;
     height: 100vh;
     overflow: hidden;
-    padding: 18px;
-    gap: 18px;
+    padding: 14px;
+    gap: 12px;
   }
 
   .sidebar {
-    width: 288px;
+    width: var(--sidebar-width);
+    min-width: 220px;
+    max-width: 460px;
     padding: 26px 22px;
     display: flex;
     flex-direction: column;
     gap: 20px;
     position: relative;
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(60, 70, 60, 0.08);
+    background: var(--ink-panel);
+    border: 1px solid var(--ink-border);
     border-radius: 28px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-soft);
     backdrop-filter: blur(12px);
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: width 220ms ease, padding 220ms ease, opacity 220ms ease, transform 220ms ease;
   }
 
   .brand {
@@ -46,8 +57,8 @@
     border-radius: 20px;
     display: grid;
     place-items: center;
-    background: rgba(95, 158, 160, 0.12);
-    border: 1px solid rgba(95, 158, 160, 0.12);
+    background: rgba(93, 207, 201, 0.12);
+    border: 1px solid var(--ink-border);
     color: var(--jade);
     font-size: 22px;
     font-weight: 700;
@@ -57,13 +68,13 @@
     margin: 0;
     font-size: 28px;
     line-height: 1.1;
-    color: var(--ink-text);
+    color: var(--ink-heading-primary);
     font-weight: 700;
   }
 
   .brand-subtitle {
     margin: 0;
-    color: var(--ink-text-muted);
+    color: var(--ink-copy);
     font-size: 13px;
     line-height: 1.6;
   }
@@ -73,12 +84,12 @@
     gap: 8px;
     margin-top: 14px;
     padding-top: 16px;
-    border-top: 1px solid rgba(60, 70, 60, 0.08);
+    border-top: 1px solid var(--ink-border);
   }
 
   .sidebar-label {
     margin: 4px 4px 0;
-    color: var(--ink-text-muted);
+    color: var(--ink-copy-soft);
     font-size: 12px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -101,8 +112,8 @@
     gap: 14px;
     color: var(--ink-text-soft);
     border-radius: 20px;
-    border: 1px solid rgba(60, 70, 60, 0.06);
-    background: rgba(255, 255, 255, 0.48);
+    border: 1px solid rgba(108, 214, 203, 0.14);
+    background: rgba(10, 58, 65, 0.56);
     transition:
       transform 300ms ease,
       border-color 300ms ease,
@@ -114,17 +125,17 @@
   .nav-item:hover {
     transform: translateY(-1px);
     color: var(--ink-text);
-    border-color: rgba(95, 158, 160, 0.16);
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    border-color: var(--ink-border-strong);
+    background: rgba(12, 70, 78, 0.82);
+    box-shadow: var(--shadow-soft);
   }
 
   .nav-icon {
     width: 22px;
     height: 22px;
     display: block;
-    opacity: 0.78;
-    filter: grayscale(1) contrast(0.65);
+    opacity: 0.92;
+    filter: grayscale(0.2) brightness(1.18) contrast(0.9);
   }
 
   .nav-text {
@@ -141,14 +152,14 @@
 
   .nav-text span {
     font-size: 12px;
-    color: var(--ink-text-muted);
+    color: var(--ink-copy-soft);
   }
 
   .nav-item.active {
     color: var(--ink-text);
-    border-color: rgba(95, 158, 160, 0.14);
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+    border-color: var(--ink-border-strong);
+    background: rgba(93, 207, 201, 0.18);
+    box-shadow: var(--shadow-lift);
   }
 
   .nav-item.active::before {
@@ -168,14 +179,104 @@
     overflow: hidden;
   }
 
+  .splitter {
+    width: var(--splitter-width);
+    flex: 0 0 var(--splitter-width);
+    position: relative;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .splitter::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(108, 214, 203, 0.3);
+    transition: background 180ms ease, box-shadow 180ms ease;
+  }
+
+  .splitter:hover::before,
+  .splitter.dragging::before {
+    background: rgba(108, 214, 203, 0.72);
+    box-shadow: 0 0 0 4px rgba(108, 214, 203, 0.16);
+  }
+
+  .splitter-toggle {
+    position: relative;
+    z-index: 1;
+    width: 28px;
+    height: 56px;
+    border: 1px solid var(--ink-border);
+    border-radius: 999px;
+    background: rgba(10, 58, 65, 0.88);
+    color: var(--ink-text-muted);
+    box-shadow: var(--shadow-soft);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 180ms ease, color 180ms ease, background 180ms ease;
+  }
+
+  .splitter-toggle:hover {
+    color: var(--jade);
+    background: rgba(93, 207, 201, 0.18);
+    transform: scale(1.03);
+  }
+
+  .splitter-toggle span {
+    font-size: 18px;
+    line-height: 1;
+    transform: translateX(1px);
+  }
+
+  body.sidebar-collapsed {
+    --sidebar-width: 0px;
+    --splitter-width: 36px;
+  }
+
+  body.sidebar-collapsed .sidebar {
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-color: transparent;
+    box-shadow: none;
+    opacity: 0;
+    transform: translateX(-16px);
+    pointer-events: none;
+  }
+
+  body.sidebar-collapsed .splitter {
+    cursor: default;
+  }
+
+  body.sidebar-collapsed .splitter::before {
+    left: 10px;
+    width: 1px;
+    background: rgba(108, 214, 203, 0.3);
+    box-shadow: none;
+  }
+
+  body.sidebar-collapsed .splitter-toggle span {
+    transform: translateX(0);
+  }
+
   .content-shell {
     width: 100%;
     height: 100%;
     overflow: hidden;
     border-radius: 28px;
-    border: 1px solid rgba(60, 70, 60, 0.08);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--ink-border);
+    box-shadow: var(--shadow-soft);
+    background: rgba(8, 47, 53, 0.7);
     backdrop-filter: blur(12px);
   }
 
@@ -186,10 +287,37 @@
     background: transparent;
   }
 
+  @media (max-width: 900px) {
+    body {
+      flex-direction: column;
+      height: auto;
+      min-height: 100vh;
+      overflow: auto;
+    }
+
+    .sidebar {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+    }
+
+    .splitter {
+      display: none;
+    }
+
+    .content {
+      min-height: 0;
+    }
+
+    .content-shell {
+      min-height: calc(100vh - 220px);
+    }
+  }
+
 </style>
-  <script type="module" crossorigin src="/RL-VIZ/assets/main-QPVmd1xW.js"></script>
-  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/ink-theme-DtODCcuF.js">
-  <link rel="stylesheet" crossorigin href="/RL-VIZ/assets/ink-theme-CGoIS5iB.css">
+  <script type="module" crossorigin src="/RL-VIZ/assets/main-B9spnYBm.js"></script>
+  <link rel="modulepreload" crossorigin href="/RL-VIZ/assets/ink-theme-B9CfNZtT.js">
+  <link rel="stylesheet" crossorigin href="/RL-VIZ/assets/ink-theme-BrGjx0TA.css">
 </head>
 <body>
 <div id="app"></div>
@@ -199,13 +327,13 @@
       <div class="brand-badge">RL</div>
       <div>
         <h1 class="brand-title">RL Visualization Lab</h1>
-        <p class="brand-subtitle">Training curves and diagnostics</p>
+        <p class="brand-subtitle">Training curves </p>
       </div>
     </div>
-    <p class="brand-subtitle">Monitor training progress, compare reward trends, and inspect diagnostics for policy quality and learning stability.</p>
     <div class="brand-meta">
-      <p class="brand-subtitle">Chinese Chess PPO</p>
-      <p class="brand-subtitle">Maze Q-learning</p>
+      <p class="brand-subtitle"> - Training progress</p>
+      <p class="brand-subtitle"> - Reward trends</p>
+      <p class="brand-subtitle"> - Policy quality & learning stability</p>
     </div>
   </div>
 
@@ -229,6 +357,12 @@
     <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" class="nav-icon" alt="GitHub">
     <span class="nav-text"><strong>Project Repo</strong><span>Source & collaboration</span></span>
   </a>
+</div>
+
+<div id="sidebarSplitter" class="splitter">
+  <button id="sidebarToggle" class="splitter-toggle" type="button" aria-label="隐藏侧边栏" aria-expanded="true">
+    <span>‹</span>
+  </button>
 </div>
 
 <div class="content">
