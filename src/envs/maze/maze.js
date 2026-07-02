@@ -33,12 +33,12 @@ const mazeEpisodeViewer = createEpisodeViewer({
 //   epsilon: 0.1,//探索率
 // };
 const initConfig = {
-  cols: 25,// 必须奇数
-  rows: 25,
-  cellSize: 35,
+  cols: 21,// 必须奇数
+  rows: 21,
+  cellSize: 29,
 
-  renderTrain: true,
-  renderSpeed: 10,
+  renderTrain: false,
+  renderSpeed: 5,
   stepMode: true,
   stop: false,
 
@@ -46,7 +46,7 @@ const initConfig = {
   maxSteps: 400,
   currentEpisode: 0,
 
-  EpRenderInterval: 20,
+  EpRenderInterval: 1,
 
   alpha: 0.1,//学习率
   gamma: 0.95,//折扣因子 对未来奖励的影响程度

@@ -70,13 +70,18 @@
 
         #maze_info {
             position: absolute;
-            top: 30px;
-            left: 26px;
+            top: 20px;
             font-size: 18px;
-            color: var(--gold);
-            letter-spacing: 0.04em;
+            left: 50%;
+            transform: translateX(calc(-50% + 60px));
+            color:#ffffff;
+            width:120px;
+            height:30px;
         }
-
+#currentEpisode {
+    position: absolute;
+    color: #ffffff;
+}
         #game {
             min-height: 0;
             padding: 80px 20px 24px;
@@ -147,7 +152,7 @@
         }
 
         .controls-grid--actions {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
         }
 
         .controls-grid--settings {
@@ -530,10 +535,7 @@
                 padding: 64px 8px 16px;
             }
 
-            #maze_info {
-                top: 20px;
-                left: 16px;
-            }
+
 
             #maze_steps {
                 position: static;
@@ -570,12 +572,12 @@
             <span class="maze_v" id="cfgQagent_r">r(即时奖励): 0</span>
             <span class="maze_v" id="cfgQagent_qs">s'(下一状态): 0,0</span>
             <textarea class="maze_v" id="cfgQValue"></textarea>
-            <span id="maze_tooltip"></span>
+            
             <div id="maze_steps">
                 <div id="maze_Steps" class="step-container"></div>
             </div>
         </div>
-
+<span id="maze_tooltip"></span>
         <div id="controls">
             <div class="controls-section-title">Actions</div>
             <div class="controls-grid controls-grid--actions">
