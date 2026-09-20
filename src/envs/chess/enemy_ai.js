@@ -1,8 +1,3 @@
-const SIDE_NAME = {
-    black: "黑方（后手）",
-    red: "红方（先手）",
-};
-
 const PIECE_NAME = {
     black: { "将": "黑将", "仕": "黑仕", "象": "黑象", "车": "黑车", "马": "黑马", "炮": "黑炮", "卒": "黑卒" },
     red: { "帅": "红帅", "士": "红士", "相": "红相", "车": "红车", "马": "红马", "炮": "红炮", "兵": "红兵" },
@@ -37,6 +32,15 @@ export class EnemyAi {
         return `${name}：(${move.fromR}, ${move.fromC}) -> (${move.toR}, ${move.toC})${capture}；${tacticalInfo}`;
     }
 
+    serializeMove(board, move) {
+        const piece = board.getPbyId(move.pieceId);
+        return {
+            piece: piece ? (PIECE_NAME[piece.p][piece.t] || piece.t) : `棋子#${move.pieceId}`,
+            from: [move.fromR, move.fromC],
+            to: [move.toR, move.toC],
+        };
+    }
+
     async step(board, side = "black") {
         return this.chooseMove(board, side);
     }
@@ -47,14 +51,21 @@ export class EnemyAi {
 
         const choices = Object.fromEntries(moves.map((move, index) => [
             `move_${String(index).padStart(3, "0")}`,
-            this.describeMove(board, move),
+            this.serializeMove(board, move),
         ]));
         const state = {
             game: "中国象棋",
-            side_to_move: SIDE_NAME[side] || side,
-            coordinate_system: "board[row][column]；row 为 0 至 9，自上而下；column 为 0 至 8，自左而右；“空”表示无棋子。",
+            side_to_move: side === "black" ? "黑" : "红",
+            coordinate_system: {
+                origin: "top_left",
+                row_range: [0, 9],
+                column_range: [0, 8],
+                row_direction: "top_to_bottom",
+                column_direction: "left_to_right",
+            },
             board: this.boardToGrid(board),
-            legal_moves: choices,
+            candidate_moves: choices,
+            candidate_moves_are_rule_verified_legal: true,
         };
 
         const jevRequest = {
@@ -63,7 +74,13 @@ export class EnemyAi {
             questions: {
                 chosen_move: {
                     type: "choice",
-                    instructions: "这是中国象棋对局。你执黑方（后手）。请基于当前棋盘局面，从 `legal_moves` 中选择一个最合适的合法走法；优先考虑将军、吃子、子力安全、控制中心和子力发展；只能选择候选项，不能创建新走法。",
+                    instructions: [
+                        "你执黑方。",
+                        "从给定候选走法中选择对当前黑方局面更有利的一步。",
+                        "不要重新判断候选是否合法，也不要创造候选列表之外的走法。",
+                        "优先比较：避免将死或强制失子、直接战术威胁、黑将安全、重大子力损失。",
+                        "若战术结果接近，再比较局面活动性和位置价值。",
+                    ],
                     criteria: choices,
                 },
             },
