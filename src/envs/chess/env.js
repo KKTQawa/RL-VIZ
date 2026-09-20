@@ -455,6 +455,13 @@ export class Game {
         this.enemy_ai = new EnemyAi();
         this.redlegalX = [[0, 187]];//红方合法动作编号
         this.redalive = 188;//红方可行动动作集合和
+        this.updateInfo("红方（你）", "等待红方走棋");
+    }
+    updateInfo(turn, action) {
+        const turnInfo = document.getElementById("turnInfo");
+        const actionInfo = document.getElementById("actionInfo");
+        if (turnInfo) turnInfo.textContent = turn;
+        if (actionInfo) actionInfo.textContent = action;
     }
     removeX(l, r) {
         const res = [];
@@ -531,7 +538,9 @@ export class Game {
             return;
         }
         //走子
-        const [ok, is_eat] = this.board.move(this.selected, r, c);
+        const movingPiece = this.selected;
+        const from = { r: movingPiece.r, c: movingPiece.c, t: movingPiece.t };
+        const [ok, is_eat] = this.board.move(movingPiece, r, c);
         // console.log(this.selected);
 
         this.selected = null;
@@ -540,6 +549,7 @@ export class Game {
         }
 
         if (ok) {
+            const redMove = `${from.t}：(${from.r}, ${from.c}) -> (${r}, ${c})`;
             const nextTurn = this.turn === "red" ? "black" : "red";
             const win = this.checkWin(nextTurn);
 
@@ -552,6 +562,7 @@ export class Game {
             }
 
             this.turn = nextTurn;
+            this.updateInfo("黑方（Jev）", `${redMove}；Jev 正在思考…`);
             //敌方走子
             if (this.turn === "black")
                 setTimeout(() => void this.reflect(), 300);
@@ -745,6 +756,7 @@ export class Game {
             return [false, false];
         }
 
+        this.updateInfo("黑方（Jev）", "正在请求 Jev 选择合法走法…");
         const move = await this.enemy_ai.chooseMove(this.board, this.turn);
         if (!move) {
             const win = this.checkWin();
@@ -760,6 +772,7 @@ export class Game {
             return [false, -1];
         }
 
+        const moveDescription = this.enemy_ai.describeMove(this.board, move);
         const piece = this.board.getPbyId(move.pieceId);
         const [ok, is_eat] = this.board.move(piece, move.toR, move.toC);
         if (this.render_mode == "render") {
@@ -769,6 +782,7 @@ export class Game {
             const nextTurn = this.turn === "red" ? "black" : "red";
             const win = this.checkWin(nextTurn);
             this.turn = nextTurn;
+            this.updateInfo("红方（你）", `Jev ${moveDescription}`);
             if (win) {
                 if (this.render_mode == "render")
                     console.info(win + " win!");
@@ -790,6 +804,7 @@ export class Game {
         this.episode = 0;
         this.redalive = 188;
         this.redlegalX = [[0, 187]];
+        this.updateInfo("红方（你）", "已重置，等待红方走棋");
         if (this.render_mode == "render") {
             this.render();
         }

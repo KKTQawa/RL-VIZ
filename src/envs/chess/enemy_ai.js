@@ -23,7 +23,18 @@ export class EnemyAi {
         const name = piece ? (PIECE_NAME[piece.p][piece.t] || piece.t) : `棋子#${move.pieceId}`;
         const target = board.get(move.toR, move.toC);
         const capture = target ? `，吃掉${PIECE_NAME[target.p][target.t] || target.t}` : "";
-        return `${name}：(${move.fromR}, ${move.fromC}) -> (${move.toR}, ${move.toC})${capture}`;
+        const nextBoard = board.clone();
+        const nextPiece = nextBoard.getPbyId(move.pieceId);
+        nextBoard.move(nextPiece, move.toR, move.toC);
+        const opponent = piece?.p === "black" ? "red" : "black";
+        const givesCheck = nextBoard.isInCheck(opponent);
+        const isThreatened = nextBoard.getAllLegalMoves(opponent, false)
+            .some(candidate => candidate.toR === move.toR && candidate.toC === move.toC);
+        const tacticalInfo = [
+            givesCheck ? "将军" : null,
+            isThreatened ? "落点受对方攻击" : "落点暂未受对方攻击",
+        ].filter(Boolean).join("；");
+        return `${name}：(${move.fromR}, ${move.fromC}) -> (${move.toR}, ${move.toC})${capture}；${tacticalInfo}`;
     }
 
     async step(board, side = "black") {
@@ -45,6 +56,20 @@ export class EnemyAi {
             board: this.boardToGrid(board),
             legal_moves: choices,
         };
+
+        const jevRequest = {
+            model: "jev-latest",
+            state,
+            questions: {
+                chosen_move: {
+                    type: "choice",
+                    instructions: "这是中国象棋对局。你执黑方（后手）。请基于当前棋盘局面，从 `legal_moves` 中选择一个最合适的合法走法；优先考虑将军、吃子、子力安全、控制中心和子力发展；只能选择候选项，不能创建新走法。",
+                    criteria: choices,
+                },
+            },
+        };
+        // Display the exact Jev request structure, deliberately excluding the user's API key.
+        window.dispatchEvent(new CustomEvent("jev-request", { detail: jevRequest }));
 
         try {
             const response = await fetch("/api/jev/chess-move", {

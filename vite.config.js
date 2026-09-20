@@ -39,7 +39,7 @@ function createJevHandler() {
                     questions: {
                         chosen_move: {
                             type: 'choice',
-                            instructions: '这是中国象棋对局。你执黑方（后手）。请基于当前棋盘局面，从 `legal_moves` 中选择一个最合适的合法走法；只能选择候选项，不能创建新走法。',
+                            instructions: '这是中国象棋对局。你执黑方（后手）。请基于当前棋盘局面，从 `legal_moves` 中选择一个最合适的合法走法；优先考虑将军、吃子、子力安全、控制中心和子力发展；只能选择候选项，不能创建新走法。',
                             criteria: choices,
                         },
                     },
