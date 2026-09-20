@@ -1,161 +1,70 @@
+const SIDE_NAME = {
+    black: "黑方（后手）",
+    red: "红方（先手）",
+};
+
+const PIECE_NAME = {
+    black: { "将": "黑将", "仕": "黑仕", "象": "黑象", "车": "黑车", "马": "黑马", "炮": "黑炮", "卒": "黑卒" },
+    red: { "帅": "红帅", "士": "红士", "相": "红相", "车": "红车", "马": "红马", "炮": "红炮", "兵": "红兵" },
+};
+
+/** Jev only chooses from the Board-generated legal candidates. */
 export class EnemyAi {
-    constructor(depth = 2) {
-        this.depth = depth;
-        this.pieceValue = {
-            "将": 100000,
-            "帅": 100000,
-            "车": 900,
-            "马": 450,
-            "炮": 450,
-            "象": 200,
-            "相": 200,
-            "仕": 200,
-            "士": 200,
-            "卒": 100,
-            "兵": 100,
-        };
+    boardToGrid(board) {
+        const grid = Array.from({ length: 10 }, () => Array(9).fill("空"));
+        for (const piece of board.pieces) {
+            grid[piece.r][piece.c] = PIECE_NAME[piece.p][piece.t] || `${piece.p}-${piece.t}`;
+        }
+        return grid;
     }
 
-    step(board, side = "black") {
+    describeMove(board, move) {
+        const piece = board.getPbyId(move.pieceId);
+        const name = piece ? (PIECE_NAME[piece.p][piece.t] || piece.t) : `棋子#${move.pieceId}`;
+        const target = board.get(move.toR, move.toC);
+        const capture = target ? `，吃掉${PIECE_NAME[target.p][target.t] || target.t}` : "";
+        return `${name}：(${move.fromR}, ${move.fromC}) -> (${move.toR}, ${move.toC})${capture}`;
+    }
+
+    async step(board, side = "black") {
         return this.chooseMove(board, side);
     }
 
-    chooseMove(board, side = "black") {
-        const moves = this.orderMoves(board.getAllLegalMoves(side), board);
+    async chooseMove(board, side = "black") {
+        const moves = board.getAllLegalMoves(side);
         if (moves.length === 0) return null;
 
-        let bestMove = moves[0];
-        let bestScore = -Infinity;
-        let alpha = -Infinity;
-        let beta = Infinity;
+        const choices = Object.fromEntries(moves.map((move, index) => [
+            `move_${String(index).padStart(3, "0")}`,
+            this.describeMove(board, move),
+        ]));
+        const state = {
+            game: "中国象棋",
+            side_to_move: SIDE_NAME[side] || side,
+            coordinate_system: "board[row][column]；row 为 0 至 9，自上而下；column 为 0 至 8，自左而右；“空”表示无棋子。",
+            board: this.boardToGrid(board),
+            legal_moves: choices,
+        };
 
-        for (let move of moves) {
-            const nextBoard = this.applyMove(board, move);
-            const score = this.alphaBeta(
-                nextBoard,
-                this.depth - 1,
-                alpha,
-                beta,
-                this.opponent(side)
-            );
+        try {
+            const response = await fetch("/api/jev/chess-move", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                // User-entered keys are session-only and never written to disk by the app.
+                body: JSON.stringify({ state, choices, apiKey: sessionStorage.getItem("jevApiKey") || undefined }),
+            });
+            if (!response.ok) throw new Error(`Jev request failed (${response.status})`);
 
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = move;
+            const { choice, confidence } = await response.json();
+            const index = Number.parseInt(choice?.replace("move_", ""), 10);
+            if (Number.isInteger(index) && index >= 0 && index < moves.length && choices[choice]) {
+                console.info(`Jev chose ${choice} (confidence: ${confidence ?? "unknown"})`);
+                return moves[index];
             }
-
-            alpha = Math.max(alpha, bestScore);
+            throw new Error("Jev returned a move outside the legal candidate list");
+        } catch (error) {
+            console.warn("Jev unavailable; using the first already-legal move.", error);
+            return moves[0];
         }
-
-        return bestMove;
-    }
-
-    alphaBeta(board, depth, alpha, beta, side) {
-        if (depth === 0 || this.isTerminal(board)) {
-            return this.evaluate(board);
-        }
-
-        const moves = this.orderMoves(board.getAllLegalMoves(side), board);
-        if (moves.length === 0) {
-            return this.evaluate(board);
-        }
-
-        if (side === "black") {
-            let value = -Infinity;
-
-            for (let move of moves) {
-                const nextBoard = this.applyMove(board, move);
-                value = Math.max(
-                    value,
-                    this.alphaBeta(nextBoard, depth - 1, alpha, beta, "red")
-                );
-                alpha = Math.max(alpha, value);
-                if (alpha >= beta) break;
-            }
-
-            return value;
-        }
-
-        let value = Infinity;
-
-        for (let move of moves) {
-            const nextBoard = this.applyMove(board, move);
-            value = Math.min(
-                value,
-                this.alphaBeta(nextBoard, depth - 1, alpha, beta, "black")
-            );
-            beta = Math.min(beta, value);
-            if (alpha >= beta) break;
-        }
-
-        return value;
-    }
-
-    applyMove(board, move) {
-        const nextBoard = board.clone();
-        const piece = nextBoard.getPbyId(move.pieceId);
-        nextBoard.move(piece, move.toR, move.toC);
-        return nextBoard;
-    }
-
-    isTerminal(board) {
-        const redKing = board.pieces.find(p => p.p === "red" && p.t === "帅");
-        const blackKing = board.pieces.find(p => p.p === "black" && p.t === "将");
-        return !redKing || !blackKing;
-    }
-
-    evaluate(board) {
-        const redKing = board.pieces.find(p => p.p === "red" && p.t === "帅");
-        const blackKing = board.pieces.find(p => p.p === "black" && p.t === "将");
-
-        if (!redKing) return 1000000;
-        if (!blackKing) return -1000000;
-
-        let score = 0;
-
-        for (let piece of board.pieces) {
-            const base = this.pieceValue[piece.t] || 0;
-            let bonus = 0;
-
-            if (piece.t === "卒") {
-                bonus += piece.r * 8;
-            } else if (piece.t === "兵") {
-                bonus += (9 - piece.r) * 8;
-            }
-
-            if (piece.p === "black") {
-                score += base + bonus;
-            } else {
-                score -= base + bonus;
-            }
-        }
-
-        const blackMobility = board.getAllLegalMoves("black", false).length;
-        const redMobility = board.getAllLegalMoves("red", false).length;
-        score += (blackMobility - redMobility) * 2;
-
-        if (board.isInCheck("red")) score += 50;
-        if (board.isInCheck("black")) score -= 50;
-
-        return score;
-    }
-
-    orderMoves(moves, board) {
-        return [...moves].sort((a, b) => this.moveScore(board, b) - this.moveScore(board, a));
-    }
-
-    moveScore(board, move) {
-        const target = board.get(move.toR, move.toC);
-        if (!target) return 0;
-
-        const attacker = board.getPbyId(move.pieceId);
-        const gain = this.pieceValue[target.t] || 0;
-        const risk = attacker ? (this.pieceValue[attacker.t] || 0) : 0;
-
-        return gain * 10 - risk;
-    }
-
-    opponent(side) {
-        return side === "black" ? "red" : "black";
     }
 }

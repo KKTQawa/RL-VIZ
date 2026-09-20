@@ -60,6 +60,27 @@
             width: 100%;
             margin-bottom: 10px;
         }
+
+        .key-label {
+            display: block;
+            margin: 14px 0 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        #jevKeyInput {
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 6px;
+            padding: 7px;
+        }
+
+        #jevKeyHint {
+            margin: 0 0 12px;
+            color: #555;
+            font-size: 12px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 
@@ -76,6 +97,9 @@
         <button id="loadBtn">加载模型</button>
         <button id="saveBtn">保存模型</button>
         <button id="drawGraphBtn">测试绘图</button>
+        <label class="key-label" for="jevKeyInput">Jev API Key</label>
+        <input id="jevKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="留空则使用服务端默认 Key">
+        <p id="jevKeyHint">仅保存在本浏览器标签页，会在每次黑方走棋时使用。</p>
     </div>
 
 </div>
@@ -91,6 +115,14 @@
     document.getElementById('loadBtn').addEventListener('click', load);
     document.getElementById('saveBtn').addEventListener('click', save);
     document.getElementById('drawGraphBtn').addEventListener('click', drawGraph);
+
+    const jevKeyInput = document.getElementById('jevKeyInput');
+    jevKeyInput.value = sessionStorage.getItem('jevApiKey') || '';
+    jevKeyInput.addEventListener('input', () => {
+        const key = jevKeyInput.value.trim();
+        if (key) sessionStorage.setItem('jevApiKey', key);
+        else sessionStorage.removeItem('jevApiKey');
+    });
 </script>
 
 </body>

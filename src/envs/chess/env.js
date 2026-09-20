@@ -452,7 +452,7 @@ export class Game {
         this.render_mode = "render";
         this.initEvents();
         this.render();
-        this.enemy_ai = new EnemyAi(2);
+        this.enemy_ai = new EnemyAi();
         this.redlegalX = [[0, 187]];//红方合法动作编号
         this.redalive = 188;//红方可行动动作集合和
     }
@@ -554,7 +554,7 @@ export class Game {
             this.turn = nextTurn;
             //敌方走子
             if (this.turn === "black")
-                setTimeout(() => this.reflect(), 300);
+                setTimeout(() => void this.reflect(), 300);
             this.episode++;
             console.warn("episode:", this.episode);
         }
@@ -624,7 +624,7 @@ export class Game {
         if (interval > 0) {
             await new Promise(resolve => setTimeout(resolve, interval));//1s
         }
-        const [_, been_eat] = this.reflect(false);
+        const [_, been_eat] = await this.reflect(false);
         const win2 = this.checkWin();
         if (win2) {
             if (win2 === "red") {
@@ -738,14 +738,14 @@ export class Game {
         return side === "red" ? "black" : "red";
     }
     //敌方AI步进
-    reflect(is_auto_end = true) {
+    async reflect(is_auto_end = true) {
         if (this.turn != "black") {
             console.log("error:turn is not black!")
             this.reset();
             return [false, false];
         }
 
-        const move = this.enemy_ai.chooseMove(this.board, this.turn);
+        const move = await this.enemy_ai.chooseMove(this.board, this.turn);
         if (!move) {
             const win = this.checkWin();
 
