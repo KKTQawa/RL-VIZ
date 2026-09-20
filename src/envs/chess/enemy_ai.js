@@ -92,8 +92,8 @@ export class EnemyAi {
             const response = await fetch("/api/jev/chess-move", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                // User-entered keys are session-only and never written to disk by the app.
-                body: JSON.stringify({ state, choices, apiKey: sessionStorage.getItem("jevApiKey") || undefined }),
+                // User-entered keys are memory-only and never written to disk by the app.
+                body: JSON.stringify({ state, choices, apiKey: window.jevApiKey || undefined }),
             });
             if (!response.ok) throw new Error(`Jev request failed (${response.status})`);
 

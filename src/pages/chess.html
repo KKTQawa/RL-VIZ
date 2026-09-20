@@ -35,7 +35,7 @@
             <pre id="promptLog">尚未发送请求。红方走棋后将在这里显示本回合的 Jev 请求。</pre>
             <label class="key-label" for="jevKeyInput">Jev API Key</label>
             <input id="jevKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="留空则使用服务端默认 Key">
-            <p class="hint">仅保存在本浏览器标签页；不会显示在请求日志中。</p>
+            <p class="hint">页面首次加载时为空；重置对局不会清空它，也不会显示在请求日志中。</p>
         </aside>
 
         <section id="game">
@@ -57,15 +57,17 @@
         document.getElementById('resetBtn').addEventListener('click', reset);
 
         const jevKeyInput = document.getElementById('jevKeyInput');
-        jevKeyInput.value = sessionStorage.getItem('jevApiKey') || '';
+        // Keep the key only in this page's memory. A fresh page load always starts blank.
+        window.jevApiKey = '';
         jevKeyInput.addEventListener('input', () => {
-            const key = jevKeyInput.value.trim();
-            if (key) sessionStorage.setItem('jevApiKey', key);
-            else sessionStorage.removeItem('jevApiKey');
+            window.jevApiKey = jevKeyInput.value.trim();
         });
 
         window.addEventListener('jev-request', ({ detail }) => {
             document.getElementById('promptLog').textContent = JSON.stringify(detail, null, 2);
+        });
+        window.addEventListener('jev-reset', () => {
+            document.getElementById('promptLog').textContent = '尚未发送请求。红方走棋后将在这里显示本回合的 Jev 请求。';
         });
     </script>
 </body>

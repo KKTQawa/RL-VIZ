@@ -804,6 +804,7 @@ export class Game {
         this.episode = 0;
         this.redalive = 188;
         this.redlegalX = [[0, 187]];
+        window.dispatchEvent(new CustomEvent("jev-reset"));
         this.updateInfo("红方（你）", "已重置，等待红方走棋");
         if (this.render_mode == "render") {
             this.render();
